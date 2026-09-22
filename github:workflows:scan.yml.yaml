@@ -1,0 +1,30 @@
+name: Market Scanner
+
+on:
+  schedule:
+    # Every 15 minutes, 9:30am-4:00pm ET (13:30-20:00 UTC) on weekdays.
+    # GitHub cron runs in UTC and doesn't auto-adjust for daylight saving -
+    # this covers EST; shift by 1 hour during EDT if you want exact RTH.
+    - cron: "*/15 13-20 * * 1-5"
+  workflow_dispatch: {}   # lets you trigger a manual run from the Actions tab
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run scanner
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python scanner.py
